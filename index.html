@@ -282,7 +282,7 @@
     }
 
     button:disabled {
-      opacity: 0.6;
+      opacity: 0.55;
       cursor: not-allowed;
     }
 
@@ -298,13 +298,13 @@
       background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
     }
 
-    .btn-hd-safelinku {
+    .btn-hd-ad {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: #1e1b07;
       box-shadow: 0 8px 22px rgba(245, 158, 11, 0.28);
     }
 
-    .btn-hd-safelinku:hover:not(:disabled) {
+    .btn-hd-ad:hover:not(:disabled) {
       background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     }
 
@@ -541,11 +541,13 @@
       border-radius: 999px;
     }
 
+    /* Overlay Modals (Floating Ad & Donate) */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(2, 6, 23, 0.82);
-      backdrop-filter: blur(10px);
+      background: rgba(2, 6, 23, 0.86);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -555,29 +557,69 @@
 
     .modal-overlay.open {
       display: flex;
+      animation: fadeUp 0.25s ease;
     }
 
     .modal-box {
       background: #0f172a;
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(148, 163, 184, 0.25);
       border-radius: 22px;
-      max-width: 400px;
+      max-width: 430px;
       width: 100%;
       padding: 22px;
       text-align: center;
       position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
     }
 
     .modal-close {
       position: absolute;
       top: 14px;
       right: 14px;
-      width: 34px;
-      height: 34px;
-      padding: 0;
-      border-radius: 50%;
-      background: rgba(30, 41, 59, 0.9);
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(30, 41, 59, 0.95);
       color: var(--text-muted);
+      font-size: 0.82rem;
+      border: 1px solid var(--border);
+    }
+
+    .modal-close.ready {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #032615;
+      border-color: transparent;
+      font-weight: 800;
+    }
+
+    .ad-slot-container {
+      min-height: 266px;
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      margin: 14px 0;
+      overflow: hidden;
+    }
+
+    .ad-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .ad-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #10b981);
+      transition: width 0.3s linear;
     }
 
     .modal-badge {
@@ -587,20 +629,20 @@
       text-transform: uppercase;
       padding: 4px 12px;
       border-radius: 999px;
-      background: rgba(244, 63, 94, 0.16);
-      color: #fda4af;
+      background: rgba(245, 158, 11, 0.16);
+      color: #fcd34d;
       margin-bottom: 8px;
     }
 
     .modal-box h2 {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       margin-bottom: 4px;
     }
 
     .modal-box p {
       font-size: 0.83rem;
       color: var(--text-muted);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .qris-frame {
@@ -696,7 +738,7 @@
     <header>
       <div class="creator-tag">Official Media Tool by <span>TAKAAA</span></div>
       <h1>TikTok <span class="gradient-text">No Watermark</span> Downloader</h1>
-      <p>Unduh video standar gratis langsung, atau pilih <strong>Full HD 1080p</strong> melalui halaman verifikasi Safelinku.</p>
+      <p>Unduh video standar gratis langsung, atau tonton iklan sponsor selama 8 detik untuk mengunduh kualitas <strong>Full HD 1080p (.MP4)</strong>.</p>
     </header>
 
     <!-- Input URL Card -->
@@ -760,11 +802,46 @@
     </footer>
   </div>
 
+  <!-- MODAL IKLAN MENGAMBANG (ADSTERRA 300x250) -->
+  <div class="modal-overlay" id="floatingAdModal">
+    <div class="modal-box">
+      <button type="button" class="modal-close" id="closeFloatingAdBtn" disabled>8d</button>
+
+      <div class="modal-badge">Iklan Sponsor • Buka Video HD</div>
+      <h2 id="adModalTitle">Menyiapkan Video Full HD...</h2>
+      <p id="adModalSubtitle">Tunggu hitung mundur selesai lalu klik tombol <strong>✕</strong> untuk mengunduh file <strong>.MP4 HD</strong>.</p>
+
+      <!-- SLOT BANNER ADSTERRA 300x250 -->
+      <div class="ad-slot-container" id="adScriptSlot">
+        <script>
+          atOptions = {
+            'key' : '5166ec6c3fb5b328a3df8bf8f25e8333',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script data-cfasync="false" src="https://bauval.org/22/5166ec6c3fb5b328a3df8bf8f25e8333"></script>
+      </div>
+
+      <div class="ad-progress-bar">
+        <div class="ad-progress-fill" id="floatingAdProgress"></div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <button type="button" class="btn-primary" id="confirmHdDownloadBtn" disabled style="width: 100%;">
+          ⏳ Tunggu 8 detik...
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Donate QRIS -->
   <div class="modal-overlay" id="donateModal">
     <div class="modal-box">
       <button type="button" class="modal-close" id="closeDonateBtn">✕</button>
-      <div class="modal-badge">Support Developer</div>
+      <div class="modal-badge" style="background: rgba(244, 63, 94, 0.16); color: #fda4af;">Support Developer</div>
       <h2>Donate untuk TAKAAA</h2>
       <p>Scan QRIS <strong>TAKAAA STORE</strong> via GoPay, DANA, OVO, ShopeePay, atau mobile banking.</p>
 
@@ -787,7 +864,7 @@
   <div class="toast" id="toast">Siap!</div>
 
   <script>
-    const SAFELINKU_API_TOKEN = "ec5c659ca4f2608d4a832d0009e2d2a5a307e797";
+    const AD_WAIT_SECONDS = 8;
 
     const tiktokUrlInput = document.getElementById('tiktokUrlInput');
     const pasteBtn = document.getElementById('pasteBtn');
@@ -810,6 +887,13 @@
     const downloadAllSlidesBtn = document.getElementById('downloadAllSlidesBtn');
     const toast = document.getElementById('toast');
 
+    // Elemen Modal Iklan Mengambang
+    const floatingAdModal = document.getElementById('floatingAdModal');
+    const closeFloatingAdBtn = document.getElementById('closeFloatingAdBtn');
+    const adModalTitle = document.getElementById('adModalTitle');
+    const floatingAdProgress = document.getElementById('floatingAdProgress');
+    const confirmHdDownloadBtn = document.getElementById('confirmHdDownloadBtn');
+
     // Modal Donate
     const donateModal = document.getElementById('donateModal');
     document.getElementById('openDonateTopBtn').addEventListener('click', () => donateModal.classList.add('open'));
@@ -826,6 +910,8 @@
     });
 
     let currentMedia = null;
+    let pendingHdDownload = null;
+    let adCountdownTimer = null;
 
     function showToast(msg) {
       toast.textContent = msg;
@@ -887,13 +973,71 @@
       throw new Error(lastErrors.join(' | '));
     }
 
-    function openViaSafelinku(targetHdUrl) {
-      const token = SAFELINKU_API_TOKEN.trim();
-      const quickLinkUrl = `https://sfl.gl/st/?api=${encodeURIComponent(token)}&url=${encodeURIComponent(targetHdUrl)}`;
+    function openFloatingAdForHd(hdUrl, filename, triggerBtn) {
+      pendingHdDownload = { hdUrl, filename, triggerBtn };
 
-      window.open(quickLinkUrl, '_blank', 'noopener,noreferrer');
-      showToast('Dialihkan ke Safelinku untuk unduh HD!');
+      if (adCountdownTimer) {
+        clearInterval(adCountdownTimer);
+        adCountdownTimer = null;
+      }
+
+      let remaining = AD_WAIT_SECONDS;
+      closeFloatingAdBtn.disabled = true;
+      closeFloatingAdBtn.classList.remove('ready');
+      closeFloatingAdBtn.textContent = `${remaining}d`;
+
+      confirmHdDownloadBtn.disabled = true;
+      confirmHdDownloadBtn.textContent = `⏳ Tunggu ${remaining} detik...`;
+      adModalTitle.textContent = 'Menyiapkan Video Full HD...';
+      floatingAdProgress.style.width = '0%';
+
+      floatingAdModal.classList.add('open');
+
+      adCountdownTimer = setInterval(() => {
+        remaining--;
+        const pct = ((AD_WAIT_SECONDS - remaining) / AD_WAIT_SECONDS) * 100;
+        floatingAdProgress.style.width = `${pct}%`;
+
+        if (remaining > 0) {
+          closeFloatingAdBtn.textContent = `${remaining}d`;
+          confirmHdDownloadBtn.textContent = `⏳ Tunggu ${remaining} detik...`;
+        } else {
+          clearInterval(adCountdownTimer);
+          adCountdownTimer = null;
+
+          closeFloatingAdBtn.disabled = false;
+          closeFloatingAdBtn.classList.add('ready');
+          closeFloatingAdBtn.textContent = '✕';
+
+          confirmHdDownloadBtn.disabled = false;
+          confirmHdDownloadBtn.textContent = '🎬 Tutup Iklan & Download Video HD (.MP4)';
+          adModalTitle.textContent = 'Video Full HD Siap Diunduh!';
+          floatingAdProgress.style.width = '100%';
+        }
+      }, 1000);
     }
+
+    function finishAdAndDownloadHd() {
+      floatingAdModal.classList.remove('open');
+
+      if (pendingHdDownload) {
+        const { hdUrl, filename, triggerBtn } = pendingHdDownload;
+        pendingHdDownload = null;
+        triggerDirectDownload(hdUrl, filename, triggerBtn);
+      }
+    }
+
+    closeFloatingAdBtn.addEventListener('click', () => {
+      if (!closeFloatingAdBtn.disabled) {
+        finishAdAndDownloadHd();
+      }
+    });
+
+    confirmHdDownloadBtn.addEventListener('click', () => {
+      if (!confirmHdDownloadBtn.disabled) {
+        finishAdAndDownloadHd();
+      }
+    });
 
     async function triggerDirectDownload(fileUrl, filename, btnElement) {
       const originalText = btnElement ? btnElement.textContent : '';
@@ -901,13 +1045,20 @@
         btnElement.disabled = true;
         btnElement.textContent = '⏳ Mengunduh...';
       }
-      showToast('Menyiapkan unduhan...');
+      showToast('Mengunduh file ke penyimpanan...');
 
       try {
         const res = await fetchWithTimeout(fileUrl, {}, 25000);
         if (!res.ok) throw new Error('Direct blob gagal');
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
+        const rawBlob = await res.blob();
+
+        let mimeType = rawBlob.type;
+        if (filename.endsWith('.mp4')) mimeType = 'video/mp4';
+        else if (filename.endsWith('.mp3')) mimeType = 'audio/mpeg';
+        else if (filename.endsWith('.jpg')) mimeType = 'image/jpeg';
+
+        const typedBlob = new Blob([rawBlob], { type: mimeType });
+        const blobUrl = URL.createObjectURL(typedBlob);
 
         const link = document.createElement('a');
         link.href = blobUrl;
@@ -916,7 +1067,7 @@
         link.click();
         link.remove();
 
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
         showToast(`Berhasil diunduh: ${filename}`);
       } catch (e) {
         const fallbackLink = document.createElement('a');
@@ -927,7 +1078,7 @@
         document.body.appendChild(fallbackLink);
         fallbackLink.click();
         fallbackLink.remove();
-        showToast('Membuka file unduhan...');
+        showToast('Membuka file video...');
       } finally {
         if (btnElement) {
           btnElement.disabled = false;
@@ -964,10 +1115,10 @@
         if (hdUrl) {
           const hdBtn = document.createElement('button');
           hdBtn.type = 'button';
-          hdBtn.className = 'btn-hd-safelinku';
-          hdBtn.textContent = '🔒 Download Video HD (Via Iklan)';
+          hdBtn.className = 'btn-hd-ad';
+          hdBtn.textContent = '🔒 Download Video HD (.MP4)';
           hdBtn.addEventListener('click', () => {
-            openViaSafelinku(hdUrl);
+            openFloatingAdForHd(hdUrl, `TAKAAA_${authorHandle}_${uniqueId}_HD.mp4`, hdBtn);
           });
           downloadActions.appendChild(hdBtn);
         }
@@ -976,9 +1127,9 @@
           const sdBtn = document.createElement('button');
           sdBtn.type = 'button';
           sdBtn.className = 'btn-secondary';
-          sdBtn.textContent = '📱 Download Standar (Gratis)';
+          sdBtn.textContent = '📱 Download Standar (.MP4)';
           sdBtn.addEventListener('click', () => {
-            triggerDirectDownload(sdUrl, `TAKAAA_${authorHandle}_${uniqueId}.mp4`, sdBtn);
+            triggerDirectDownload(sdUrl, `TAKAAA_${authorHandle}_${uniqueId}_SD.mp4`, sdBtn);
           });
           downloadActions.appendChild(sdBtn);
         }
@@ -989,7 +1140,7 @@
         const audioBtn = document.createElement('button');
         audioBtn.type = 'button';
         audioBtn.className = 'btn-accent';
-        audioBtn.textContent = '🎵 Download Audio MP3';
+        audioBtn.textContent = '🎵 Download Audio (.MP3)';
         audioBtn.addEventListener('click', () => {
           triggerDirectDownload(audioUrl, `TAKAAA_${authorHandle}_${uniqueId}.mp3`, audioBtn);
         });
