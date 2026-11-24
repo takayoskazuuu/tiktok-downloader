@@ -933,7 +933,7 @@
       return `https://www.tikwm.com${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
-    async function fetchWithTimeout(url, options = {}, timeoutMs = 9000) {
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
@@ -944,19 +944,29 @@
     }
 
     async function resolveTikTokData(tiktokUrl) {
-      const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(tiktokUrl)}&hd=1`;
-      const routes = [
-        { name: 'Direct API', url: apiEndpoint },
-        { name: 'Proxy A', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(apiEndpoint)}` },
-        { name: 'Proxy B', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(apiEndpoint)}` }
+      const tikwmApi = 'https://www.tikwm.com/api/';
+      const formBody = new URLSearchParams({ url: tiktokUrl, hd: '1' }).toString();
+
+      // Jalur 1 & 2: POST ke TikWM (Direct & via CorsProxy)
+      const postRoutes = [
+        { name: 'Direct API (POST)', url: tikwmApi },
+        { name: 'Proxy Utama', url: `https://corsproxy.io/?${encodeURIComponent(tikwmApi)}` }
       ];
 
       let lastErrors = [];
 
-      for (const route of routes) {
+      for (const route of postRoutes) {
         try {
           apiStatusText.textContent = `Menghubungkan (${route.name})...`;
-          const res = await fetchWithTimeout(route.url, {}, 9000);
+          const res = await fetchWithTimeout(route.url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              'Accept': 'application/json'
+            },
+            body: formBody
+          }, 15000);
+
           if (!res.ok) throw new Error(`${route.name} HTTP ${res.status}`);
           const json = await res.json();
 
@@ -964,10 +974,26 @@
             apiStatusText.textContent = `Terhubung • ${route.name}`;
             return json.data;
           }
-          throw new Error(json.msg || 'Video tidak ditemukan / bersifat privat');
+          throw new Error(json.msg || 'Video privat atau tidak ditemukan');
         } catch (err) {
           lastErrors.push(err.name === 'AbortError' ? `${route.name} Timeout` : err.message);
         }
+      }
+
+      // Jalur 3: Fallback GET via AllOrigins dengan timeout lebih panjang (16 detik)
+      try {
+        apiStatusText.textContent = 'Menghubungkan (Jalur Cadangan)...';
+        const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`${tikwmApi}?url=${encodeURIComponent(tiktokUrl)}&hd=1`)}`;
+        const res = await fetchWithTimeout(fallbackUrl, {}, 16000);
+        if (!res.ok) throw new Error(`Cadangan HTTP ${res.status}`);
+        const json = await res.json();
+
+        if (json.code === 0 && json.data) {
+          apiStatusText.textContent = 'Terhubung • Jalur Cadangan';
+          return json.data;
+        }
+      } catch (err) {
+        lastErrors.push(err.name === 'AbortError' ? 'Cadangan Timeout' : err.message);
       }
 
       throw new Error(lastErrors.join(' | '));
